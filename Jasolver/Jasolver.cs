@@ -5,9 +5,9 @@ namespace Jasolver
     public class JsonApiSetting
     {
 
-        public void AddDtoAssembliesNamespaceGroupWise(string groupName, string mainAssemblyName, string dtoAssembliesNamespace)
+        public void AddDtoAssembliesNamespaceGroupWise(string groupName, string assemblyName, string dtoNamespace)
         {
-            Resolver.AddDtoAssembliesNamespaceGroupWise(groupName, mainAssemblyName, dtoAssembliesNamespace);
+            Resolver.AddDtoAssembliesNamespaceGroupWise(groupName, assemblyName, dtoNamespace);
         }
     }
     public class JsonApi

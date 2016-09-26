@@ -36,7 +36,7 @@ namespace Jasolver.Tests
       
         [ClassInitialize]
         public static void InitTest(TestContext context) {
-            //Jasolver.JsonApi.Settings.AddDtoAssembliesNamespaceGroupWise("lms", "Jasolver.Entities");
+            Jasolver.JsonApi.Settings.AddDtoAssembliesNamespaceGroupWise("lms", "Jasolver.Tests", "Jasolver.Entities");
 
             Jasolver.JsonApi.Register();
 

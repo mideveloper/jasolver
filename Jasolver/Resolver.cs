@@ -15,17 +15,19 @@ namespace Jasolver
             if (_assemblies.Count > 0) return;
 
             var listOfAssemblies = _dtoAssembliesNameSpace.Select(x => x.Value.Item1).ToList();
+            var listOfAllTypesToRegister = _dtoAssembliesNameSpace.Select(x => x.Value.Item2).ToList();
             IEnumerable<Type> allTypes = AppDomain.CurrentDomain.GetAssemblies().Where(x => listOfAssemblies.Contains(x.FullName.Split(',')[0])).SelectMany(a =>
                                         a.GetTypes());
 
             foreach (var type in allTypes)
             {
-                if (!_assemblies.ContainsKey(type.FullName))
+                if (!_assemblies.ContainsKey(type.FullName) && listOfAllTypesToRegister.Where(x=> type.FullName.StartsWith(x)).Count() > 0)
                     _assemblies.Add(type.FullName, type);
             }
 
         }
 
+        
         /// <summary>
         /// Tuple<string, string>
         /// item1 means DTO Entities assembly reference

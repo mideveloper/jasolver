@@ -146,7 +146,15 @@ namespace Jasolver
                                 }
                                 else
                                 {
-                                    underlyingRelationShipObj.GetType().GetProperty("Id").SetValue(underlyingRelationShipObj, item.Value.data[i].id);
+                                    var propertyType = underlyingRelationShipObj.GetType();
+                                    var idProperty = propertyType.GetProperty("Id");
+                                    if (idProperty == null)
+                                    {
+                                        idProperty = propertyType.GetProperty(propertyType.Name + "Id");
+                                    }
+                                    var value = ChangeType(item.Value.data[i].id, idProperty.PropertyType);
+                                    if (value != null)
+                                        idProperty.SetValue(underlyingRelationShipObj, value);
                                     relationShipObj.Add(underlyingRelationShipObj);
                                 }
 

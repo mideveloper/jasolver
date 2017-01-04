@@ -1,8 +1,11 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Web.Helpers;
+using System.Web.Script.Serialization;
 
 namespace Jasolver
 {
@@ -10,25 +13,25 @@ namespace Jasolver
     {
         internal dynamic ReadFromJson(string rawJson, string groupName)
         {
-            var jsonObj = Json.Decode(rawJson);
+            var jsonObj = JsonConvert.DeserializeObject<dynamic>(rawJson);
 
             var data = jsonObj.data;
 
             if (data != null)
             {
-                if (data is DynamicJsonArray)
+                if (data is JArray)
                 {
                     
                     int i = 0;
                     
                     // getting first member only to get the type so collection can be created.
-                    var obj = Resolver.GetEnityObject(data[i].type,groupName);
+                    var obj = Resolver.GetEnityObject(data[i].type.ToString(),groupName);
                     IList objectCollection =  (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(obj.GetType()));
                     objectCollection.Add(prepareObject(obj, jsonObj.data[i], jsonObj.included));
 
-                    for (i = 1; i < data.Length; i++)
+                    for (i = 1; i < data.Count; i++)
                     {
-                        obj = Resolver.GetEnityObject(data[i].type,groupName);
+                        obj = Resolver.GetEnityObject(data[i].type.ToString(), groupName);
                         objectCollection.Add(prepareObject(obj, jsonObj.data[i], jsonObj.included));
                     }
 
@@ -36,7 +39,7 @@ namespace Jasolver
                 }
                 else
                 {
-                    var obj = Resolver.GetEnityObject(data.type, groupName);
+                    var obj = Resolver.GetEnityObject(data.type.ToString(), groupName);
 
                     prepareObject(obj, jsonObj.data, jsonObj.included);
                     return obj;
@@ -71,7 +74,7 @@ namespace Jasolver
 
             foreach (var item in attributes)
             {
-                PropertyInfo prop = targetType.GetProperty(Resolver.Classify(item.Key, true));
+                PropertyInfo prop = targetType.GetProperty(Resolver.Classify(item.Name, true));
                 if (prop != null)
                 {
                     var value = ChangeType(item.Value, prop.PropertyType);
@@ -99,11 +102,11 @@ namespace Jasolver
 
         private dynamic findObjectInIncluded(dynamic included, string id, string type)
         {
-            if (included != null && included is DynamicJsonArray)
+            if (included != null && included is JArray)
             {
-                for (int i = 0; i < included.Length; i++)
+                for (int i = 0; i < included.Count; i++)
                 {
-                    if (included[i].id == id && included[i].type == type)
+                    if (included[i].id.ToString() == id && included[i].type.ToString() == type)
                     {
                         return included[i];
                     } 
@@ -120,11 +123,11 @@ namespace Jasolver
             {
                 foreach (var item in relationShips)
                 {
-                    PropertyInfo prop = targetType.GetProperty(Resolver.Classify(item.Key, true));
+                    PropertyInfo prop = targetType.GetProperty(Resolver.Classify(item.Name, true));
                     if (prop != null)
                     {
                         // if relationships are multiple for e.g. relationships : { id : 1, type: "articles", data:[]}
-                        if (item.Value.data is DynamicJsonArray)
+                        if (item.Value.data is JArray)
                         {
                             
                             IList relationShipObj = (IList)Activator.CreateInstance(prop.PropertyType);
@@ -134,11 +137,11 @@ namespace Jasolver
                             // create object from it and set complete object if it exists in include
                             // other wise just set the id and return
 
-                            for (int i = 0; i < item.Value.data.Length; i++)
+                            for (int i = 0; i < item.Value.data.Count; i++)
                             {
                                 // creating object of Ienumerable underlying type.
                                 var underlyingRelationShipObj = Activator.CreateInstance(prop.PropertyType.GenericTypeArguments[0]);
-                                var includeObj = findObjectInIncluded(included, item.Value.data[i].id, item.Value.data[i].type);
+                                var includeObj = findObjectInIncluded(included, item.Value.data[i].id.ToString(), item.Value.data[i].type.ToString());
 
                                 if (includeObj != null)
                                 {
@@ -152,7 +155,7 @@ namespace Jasolver
                                     {
                                         idProperty = propertyType.GetProperty(propertyType.Name + "Id");
                                     }
-                                    var value = ChangeType(item.Value.data[i].id, idProperty.PropertyType);
+                                    var value = ChangeType(item.Value.data[i].id.ToString(), idProperty.PropertyType);
                                     if (value != null)
                                         idProperty.SetValue(underlyingRelationShipObj, value);
                                     relationShipObj.Add(underlyingRelationShipObj);
@@ -164,7 +167,7 @@ namespace Jasolver
                         else
                         {
                             var relationShipObj = Activator.CreateInstance(prop.PropertyType);
-                            var includeObj = findObjectInIncluded(included, item.Value.data.id, item.Value.data.type);
+                            var includeObj = findObjectInIncluded(included, item.Value.data.id.ToString(), item.Value.data.type.ToString());
 
                             if (includeObj != null)
                             {
@@ -177,7 +180,7 @@ namespace Jasolver
                                 {
                                     idProperty = prop.PropertyType.GetProperty(prop.PropertyType.Name + "Id");
                                 }
-                                var value = ChangeType(item.Value.data.id, idProperty.PropertyType);
+                                var value = ChangeType(item.Value.data.id.ToString(), idProperty.PropertyType);
                                 if (value != null)
                                     idProperty.SetValue(relationShipObj, value);
 

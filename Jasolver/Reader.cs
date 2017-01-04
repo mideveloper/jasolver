@@ -25,13 +25,13 @@ namespace Jasolver
                     int i = 0;
                     
                     // getting first member only to get the type so collection can be created.
-                    var obj = Resolver.GetEnityObject(data[i].type,groupName);
+                    var obj = Resolver.GetEnityObject(data[i].type.ToString(),groupName);
                     IList objectCollection =  (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(obj.GetType()));
                     objectCollection.Add(prepareObject(obj, jsonObj.data[i], jsonObj.included));
 
                     for (i = 1; i < data.Count; i++)
                     {
-                        obj = Resolver.GetEnityObject(data[i].type,groupName);
+                        obj = Resolver.GetEnityObject(data[i].type.ToString(), groupName);
                         objectCollection.Add(prepareObject(obj, jsonObj.data[i], jsonObj.included));
                     }
 

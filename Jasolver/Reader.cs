@@ -90,7 +90,7 @@ namespace Jasolver
 
             if (t.IsGenericType && t.GetGenericTypeDefinition().Equals(typeof(Nullable<>)))
             {
-                if (value == null)
+                if (JValue.CreateNull().Equals(value))
                 {
                     return null;
                 }

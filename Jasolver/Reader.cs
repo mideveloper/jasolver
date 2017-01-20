@@ -19,8 +19,12 @@ namespace Jasolver
 
             if (data != null)
             {
-                if (data is JArray)
+                if (data is JArray )
                 {
+                    if(data.Count == 0)
+                    {
+                        return  null;
+                    }
                     
                     int i = 0;
                     
